@@ -11,7 +11,7 @@ class Produto extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'nome', 'preco', 'unidade', 'descricao', 'image'
+        'nome', 'preco', 'unidades', 'descricao', 'image'
     ];
 
     public function pedidos()
