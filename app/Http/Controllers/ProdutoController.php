@@ -15,6 +15,7 @@ class ProdutoController extends Controller
     public function index()
     {
         //
+        return response()->json(Produto::all(), 200);
     }
 
     /**
@@ -36,6 +37,19 @@ class ProdutoController extends Controller
     public function store(Request $request)
     {
         //
+        $produto = Produto::create([
+            'nome' => $request->nome,
+            'descricao' => $request->descricao,
+            'unidades' => $request->unidades,
+            'preco' => $request->preco,
+            'image' => $request->image
+        ]);
+
+        return response()->json([
+            'status' => (bool) $produto,
+            'data' => $produto,
+            'message' => $produto ? 'Produto Criado!' : 'Error Creating Product'
+        ]);
     }
 
     /**
@@ -47,6 +61,18 @@ class ProdutoController extends Controller
     public function show(Produto $produto)
     {
         //
+        return response()->json($produto,200);
+    }
+    /* upload de imagens */
+    public function uploadFile(Request $request)
+    {
+        if ($request->hasFile('image')) {
+            # code...
+            $name = time()."_".$request->file('image')->getClientOriginalName();
+            $request->file('image')->move(public_path('images'), $name);
+        }
+
+        return response()->json(asset("images/$name"), 201);
     }
 
     /**
@@ -70,8 +96,25 @@ class ProdutoController extends Controller
     public function update(Request $request, Produto $produto)
     {
         //
+        $status = $produto->update(
+            $request->only(['nome', 'descricao', 'unidades', 'preco', 'image'])
+        );
+        return response()->json([
+            'status' => $status,
+            'message' => $status ? 'Produto Atualizado' : 'Error updating Product'
+        ]);
     }
+    /** função atualizar unidades de produto */
+    public function updateUnits(Request $request, Produto $produto)
+    {
+        $produto->unidades = $produto->unidades + $request->get('unidades');
+        $status = $produto->save();
 
+        return response()->json([
+            'status' => $status,
+            'message' => $status ? 'Unidade Adicionada' : 'Error Adding Product Units'
+        ]);
+    }
     /**
      * Remove the specified resource from storage.
      *
@@ -81,5 +124,11 @@ class ProdutoController extends Controller
     public function destroy(Produto $produto)
     {
         //
+        $status = $produto->delete();
+
+        return response()->json([
+            'status' => $status,
+            'message' => $status ? 'Produto deletado' : 'Error Deleting Product'
+        ]);
     }
 }
